@@ -38,6 +38,9 @@ public class OrderController {
     @Autowired
     private RabbitMQProducerService rabbitMQProducerService;
 
+    @Autowired
+    private OrderMetrics orderMetrics;
+
     /**
      * GET /api/orders
      * Returns all orders in the database
@@ -156,6 +159,8 @@ public class OrderController {
             user.getId(), 
             savedOrder.getTotal().toString()
         );
+
+        orderMetrics.incrementOrdersCreated();
         
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
     }
@@ -243,4 +248,3 @@ class UpdateStatusRequest {
         this.status = status;
     }
 }
-

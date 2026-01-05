@@ -31,6 +31,26 @@ The app starts on `http://localhost:8080`.
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
+## Metrics (Prometheus) & Grafana
+- Prometheus scrape target: `http://localhost:8080/actuator/prometheus`
+- Quick run Prometheus + Grafana:
+```bash
+docker run -d --name prometheus -p 9090:9090 \
+  -v $(pwd)/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
+docker run -d --name grafana -p 3000:3000 grafana/grafana-oss:10.3.1
+```
+Prometheus config example:
+```yaml
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: 'order-service'
+    metrics_path: /actuator/prometheus
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+```
+Grafana UI: `http://localhost:3000` (admin/admin by default). Add Prometheus datasource at `http://host.docker.internal:9090`.
+
 ## Example API calls
 - List products: `curl http://localhost:8080/api/products`
 - Create order (fires Kafka + RabbitMQ events):
@@ -89,6 +109,6 @@ App settings (`src/main/resources/application.properties`):
 - `spring.application.name=order-service`
 - `management.tracing.enabled=true`
 - `management.tracing.sampling.probability=1.0`
-- `management.otlp.tracing.endpoint=http://localhost:4317`
+- `management.otlp.tracing.endpoint=http://localhost:4318/v1/traces`
 
 View traces: open `http://localhost:16686`, select service `order-service`, and search. Stop Jaeger with `docker rm -f jaeger`.

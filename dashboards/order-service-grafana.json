@@ -1,0 +1,36 @@
+{
+  "title": "Order Service",
+  "uid": "order-service",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Orders Created (rate)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "rate(order_service_orders_created_total[5m])",
+          "legendFormat": "orders/sec"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Orders Created (total)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "expr": "order_service_orders_created_total"
+        }
+      ]
+    }
+  ]
+}
