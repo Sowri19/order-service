@@ -69,3 +69,22 @@ git remote add origin <your-github-repo-url>
 git push -u origin main
 ```
 Replace `<your-github-repo-url>` with your repo and push so others can clone and run.
+
+## Jaeger tracing
+The service exports traces via OTLP to Jaeger.
+
+Run Jaeger all-in-one (enables OTLP gRPC on 4317 and UI on 16686):
+```bash
+docker run -d --name jaeger \
+  -e COLLECTOR_OTLP_ENABLED=true \
+  -p 16686:16686 -p 4317:4317 -p 4318:4318 \
+  jaegertracing/all-in-one:1.54
+```
+
+App settings (`src/main/resources/application.properties`):
+- `spring.application.name=order-service`
+- `management.tracing.enabled=true`
+- `management.tracing.sampling.probability=1.0`
+- `management.otlp.tracing.endpoint=http://localhost:4317`
+
+View traces: open `http://localhost:16686`, select service `order-service`, and search. Stop Jaeger with `docker rm -f jaeger`.
