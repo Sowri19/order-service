@@ -27,6 +27,10 @@ mvn spring-boot:run
 ```
 The app starts on `http://localhost:8080`.
 
+## API docs (Swagger UI)
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+
 ## Example API calls
 - List products: `curl http://localhost:8080/api/products`
 - Create order (fires Kafka + RabbitMQ events):
