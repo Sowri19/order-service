@@ -21,7 +21,8 @@ Use this repo to demo side-by-side Kafka vs RabbitMQ event publishing plus REST 
 - Kafka broker on `localhost:9092` with topic `order-events`
 - RabbitMQ on `localhost:5672` with user `guest/guest` (management UI on 15672)
 - Redis on `localhost:6379` (quick start: `docker run -d --name redis -p 6379:6379 redis:7`)
-- Loki + Promtail (see logging section) if you want log aggregation
+- Loki + Promtail (see logging section) for log aggregation
+- Optional RedisInsight UI: `docker run -d --name redis-insight -p 5540:5540 redislabs/redisinsight:latest` and open http://localhost:5540 (connect to host `host.docker.internal`, port `6379`)
 
 ## Run the app
 ```bash
@@ -66,6 +67,7 @@ docker run -d --name promtail -p 9080:9080 \
   -config.file=/etc/promtail/config.yml
 ```
 - In Grafana (http://localhost:3000) add Loki datasource `http://host.docker.internal:3100` to query logs and correlate with `traceId`.
+- If using RedisInsight, connect to `host.docker.internal:6379` to inspect cache entries (Spring cache name `products`).
 
 ## Example API calls
 - List products: `curl http://localhost:8080/api/products`
