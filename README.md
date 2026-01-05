@@ -20,6 +20,8 @@ Use this repo to demo side-by-side Kafka vs RabbitMQ event publishing plus REST 
 - PostgreSQL running locally with db `mydatabase` and user `sowri` (set password in `application.properties` if needed)
 - Kafka broker on `localhost:9092` with topic `order-events`
 - RabbitMQ on `localhost:5672` with user `guest/guest` (management UI on 15672)
+- Redis on `localhost:6379` (quick start: `docker run -d --name redis -p 6379:6379 redis:7`)
+- Loki + Promtail (see logging section) if you want log aggregation
 
 ## Run the app
 ```bash
@@ -50,6 +52,20 @@ scrape_configs:
       - targets: ['host.docker.internal:8080']
 ```
 Grafana UI: `http://localhost:3000` (admin/admin by default). Add Prometheus datasource at `http://host.docker.internal:9090`.
+
+## Logs with trace correlation (Loki + Promtail)
+- Log file: `logs/order-service.log` with `traceId`/`spanId` in each line.
+- Start Loki: `docker run -d --name loki -p 3100:3100 grafana/loki:2.9.4 -config.file=/etc/loki/local-config.yaml`
+- Start Promtail using provided config:
+```bash
+docker run -d --name promtail -p 9080:9080 \
+  -v /Users/sowri/Documents/order-service/loki-promtail-config.yml:/etc/promtail/config.yml \
+  -v /Users/sowri/Documents/order-service/logs:/Users/sowri/Documents/order-service/logs \
+  -v /Users/sowri/Documents/notification-service/logs:/Users/sowri/Documents/notification-service/logs \
+  grafana/promtail:2.9.4 \
+  -config.file=/etc/promtail/config.yml
+```
+- In Grafana (http://localhost:3000) add Loki datasource `http://host.docker.internal:3100` to query logs and correlate with `traceId`.
 
 ## Example API calls
 - List products: `curl http://localhost:8080/api/products`
@@ -112,3 +128,8 @@ App settings (`src/main/resources/application.properties`):
 - `management.otlp.tracing.endpoint=http://localhost:4318/v1/traces`
 
 View traces: open `http://localhost:16686`, select service `order-service`, and search. Stop Jaeger with `docker rm -f jaeger`.
+
+## Security (JWT) and Cache (Redis)
+- JWT enforced on `/api/**`; Swagger and actuator are open.
+- Configure `security.jwt.secret` (HS256) in `application.properties` and send header `Authorization: Bearer <token>`.
+- Redis cache backs `GET /api/products`; cache is evicted on product create/update/delete.

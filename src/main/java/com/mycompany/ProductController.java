@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 /**
  * ProductController - REST API endpoints for Product operations
@@ -33,6 +35,7 @@ public class ProductController {
      * Returns all products in the database
      */
     @GetMapping
+    @Cacheable("products")
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
@@ -59,6 +62,7 @@ public class ProductController {
      * Request body should contain: name, description, price, stock
      */
     @PostMapping
+    @CacheEvict(value = "products", allEntries = true)
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         Product savedProduct = productRepository.save(product);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
@@ -70,6 +74,7 @@ public class ProductController {
      * Returns 404 if product not found
      */
     @PutMapping("/{id}")
+    @CacheEvict(value = "products", allEntries = true)
     public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         
@@ -93,6 +98,7 @@ public class ProductController {
      * Returns 404 if product not found
      */
     @DeleteMapping("/{id}")
+    @CacheEvict(value = "products", allEntries = true)
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
@@ -102,4 +108,3 @@ public class ProductController {
         }
     }
 }
-
