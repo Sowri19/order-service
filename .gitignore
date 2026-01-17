@@ -17,4 +17,5 @@ target/
 
 # Logs / temp
 *.log
+logs/
 tmp/
